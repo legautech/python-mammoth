@@ -516,29 +516,46 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
 
 
     def inline(element):
-        properties = element.find_child_or_null("wp:docPr").attributes
+        properties_element = element.find_child_or_null("wp:docPr")
+
+        properties = properties_element.attributes
         if properties.get("descr", "").strip():
             alt_text = properties.get("descr")
         else:
             alt_text = properties.get("title")
+
+        hlink_click_element = properties_element.find_child_or_null("a:hlinkClick")
+        hyperlink_relationship_id = hlink_click_element.attributes.get("r:id")
+        if hyperlink_relationship_id:
+            href = relationships.find_target_by_relationship_id(hyperlink_relationship_id)
+        else:
+            href = None
+
         blips = element.find_children("a:graphic") \
             .find_children("a:graphicData") \
             .find_children("pic:pic") \
             .find_children("pic:blipFill") \
             .find_children("a:blip")
-        return _read_blips(blips, alt_text)
+        return _read_blips(blips, alt_text=alt_text, href=href)
 
-    def _read_blips(blips, alt_text):
-        return _ReadResult.concat(lists.map(lambda blip: _read_blip(blip, alt_text), blips))
+    def _read_blips(blips, alt_text, href):
+        return _ReadResult.concat(lists.map(lambda blip: _read_blip(blip, alt_text=alt_text, href=href), blips))
 
-    def _read_blip(element, alt_text):
+    def _read_blip(element, alt_text, href):
         blip_image = _find_blip_image(element)
 
         if blip_image is None:
             warning = results.warning("Could not find image file for a:blip element")
             return _empty_result_with_message(warning)
+
+        result = _read_image(blip_image, alt_text)
+        if href is None:
+            return result
         else:
-            return _read_image(blip_image, alt_text)
+            return result.map(lambda image_elements: documents.hyperlink(
+                image_elements,
+                href=href,
+            ))
 
     def _read_image(image_file, alt_text):
         image_path, open_image = image_file

@@ -22,6 +22,7 @@ from .document_matchers import (
     is_text,
     is_table,
     is_row,
+    is_image,
 )
 from ..testing import assert_equal
 
@@ -1356,10 +1357,10 @@ class ImageTests(object):
     IMAGE_BYTES = b"Not an image at all!"
     IMAGE_RELATIONSHIP_ID = "rId5"
 
-    def _read_embedded_image(self, element):
+    def _read_embedded_image(self, element, relationships=None):
         relationships = Relationships([
             _image_relationship(self.IMAGE_RELATIONSHIP_ID, "media/hat.png"),
-        ])
+        ] + (relationships or []))
 
         mocks = funk.Mocks()
         docx_file = mocks.mock()
@@ -1555,6 +1556,31 @@ class ImageTests(object):
         assert_equal([], result.messages)
         assert_equal(None, result.value)
 
+    def test_can_read_pictures_with_hyperlink_specified_in_document_properties(self):
+        drawing_element = _create_inline_image(
+            blip=_embedded_blip(self.IMAGE_RELATIONSHIP_ID),
+            doc_pr_children=[
+                xml_element("a:hlinkClick", {"r:id": "rId42"})
+            ],
+        )
+
+        result = self._read_embedded_image(
+            drawing_element,
+            relationships=[_hyperlink_relationship("rId42", "http://example.com")],
+        )
+
+        assert_that(result, is_hyperlink(
+            href="http://example.com",
+            children=is_sequence(
+                is_image(
+                    content_type="image/png",
+                )
+            )
+        ))
+        image = result.children[0]
+        with image.open() as image_file:
+            assert_equal(self.IMAGE_BYTES, image_file.read())
+
 
 def test_footnote_reference_has_id_read():
     footnote_xml = xml_element("w:footnoteReference", {"w:id": "4"})
@@ -1710,9 +1736,18 @@ def _text_element(value):
     return xml_element("w:t", {}, [xml_text(value)])
 
 
-def _create_inline_image(blip, description=None, title=None):
+def _create_inline_image(blip, description=None, doc_pr_children=None, title=None):
     return xml_element("w:drawing", {}, [
-        xml_element("wp:inline", {}, _create_image_elements(blip, description=description, title=title))
+        xml_element(
+            "wp:inline",
+            {},
+            _create_image_elements(
+                blip,
+                description=description,
+                doc_pr_children=doc_pr_children,
+                title=title,
+            )
+        ),
     ])
 
 
@@ -1722,7 +1757,7 @@ def _create_anchored_image(description, blip):
     ])
 
 
-def _create_image_elements(blip, description=None, title=None):
+def _create_image_elements(blip, description=None, doc_pr_children=None, title=None):
     properties = {}
     if description is not None:
         properties["descr"] = description
@@ -1730,7 +1765,7 @@ def _create_image_elements(blip, description=None, title=None):
         properties["title"] = title
 
     return [
-        xml_element("wp:docPr", properties),
+        xml_element("wp:docPr", properties, doc_pr_children or []),
         xml_element("a:graphic", {}, [
             xml_element("a:graphicData", {}, [
                 xml_element("pic:pic", {}, [

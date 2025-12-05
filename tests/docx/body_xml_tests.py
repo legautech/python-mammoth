@@ -1840,3 +1840,46 @@ class _NumberingMap(object):
 
     def find_level_by_paragraph_style_id(self, style_id):
         return self._levels_by_paragraph_style_id.get(style_id)
+
+
+class TrackedChangesTests(object):
+    def test_ins_is_read_as_run_when_tracked_changes_are_ignored(self):
+        element = xml_element("w:ins", {}, [
+            _run_element_with_text("Inserted text")
+        ])
+        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=True)
+        assert_equal(documents.run([documents.text("Inserted text")]), result)
+
+    def test_ins_is_read_as_insertion_when_tracked_changes_are_not_ignored(self):
+        element = xml_element("w:ins", {}, [
+            _run_element_with_text("Inserted text")
+        ])
+        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        assert_equal(documents.insertion([
+            documents.run([documents.text("Inserted text")])
+        ]), result)
+
+    def test_del_is_ignored_when_tracked_changes_are_ignored(self):
+        element = xml_element("w:del", {}, [
+            _run_element_with_text("Deleted text")
+        ])
+        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=True)
+        assert_equal(None, result)
+
+    def test_del_is_read_as_deletion_when_tracked_changes_are_not_ignored(self):
+        element = xml_element("w:del", {}, [
+            _run_element_with_text("Deleted text")
+        ])
+        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        assert_equal(documents.deletion([
+            documents.run([documents.text("Deleted text")])
+        ]), result)
+
+    def test_del_text_is_read_as_text_within_deletion(self):
+        element = xml_element("w:del", {}, [
+             xml_element("w:delText", {}, [xml_text("Deleted text")])
+        ])
+        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        assert_equal(documents.deletion([
+            documents.text("Deleted text")
+        ]), result)

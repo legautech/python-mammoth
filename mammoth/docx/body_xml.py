@@ -22,7 +22,8 @@ def reader(
     relationships=None,
     styles=None,
     docx_file=None,
-    files=None
+    files=None,
+    ignore_tracked_changes=True,
 ):
 
     if styles is None:
@@ -35,6 +36,7 @@ def reader(
         styles=styles,
         docx_file=docx_file,
         files=files,
+        ignore_tracked_changes=ignore_tracked_changes,
     )
     return _BodyReader(read_all)
 
@@ -49,7 +51,7 @@ class _BodyReader(object):
         return results.Result(result.elements, result.messages)
 
 
-def _create_reader(numbering, content_types, relationships, styles, docx_file, files):
+def _create_reader(numbering, content_types, relationships, styles, docx_file, files, ignore_tracked_changes):
     current_instr_text = []
     complex_field_stack = []
 
@@ -69,7 +71,6 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         "w:lastRenderedPageBreak",
         "w:commentRangeStart",
         "w:commentRangeEnd",
-        "w:del",
         "w:footnoteRef",
         "w:endnoteRef",
         "w:pPr",
@@ -619,6 +620,18 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
     def read_comment_reference(element):
         return _success(documents.comment_reference(element.attributes["w:id"]))
 
+    def read_insertion(element):
+        if ignore_tracked_changes:
+            return read_child_elements(element)
+        else:
+            return read_child_elements(element).map(lambda children: documents.insertion(children))
+
+    def read_deletion(element):
+        if ignore_tracked_changes:
+            return _empty_result
+        else:
+            return read_child_elements(element).map(lambda children: documents.deletion(children))
+
     def alternate_content(element):
         return read_child_elements(element.find_child_or_null("mc:Fallback"))
 
@@ -680,7 +693,6 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         "w:tbl": table,
         "w:tr": table_row,
         "w:tc": table_cell,
-        "w:ins": read_child_elements,
         "w:object": read_child_elements,
         "w:smartTag": read_child_elements,
         "w:drawing": read_child_elements,
@@ -700,6 +712,9 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         "w:footnoteReference": note_reference_reader("footnote"),
         "w:endnoteReference": note_reference_reader("endnote"),
         "w:commentReference": read_comment_reference,
+        "w:ins": read_insertion,
+        "w:del": read_deletion,
+        "w:delText": text,
         "mc:AlternateContent": alternate_content,
         "w:sdt": read_sdt
     }

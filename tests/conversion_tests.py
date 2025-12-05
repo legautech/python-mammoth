@@ -663,3 +663,17 @@ def _style_mapping(text):
     result = read_style_mapping(text)
     assert_equal([], result.messages)
     return result.value
+
+
+def test_insertion_is_converted_to_ins():
+    result = convert_document_element_to_html(
+        documents.insertion(children=[documents.text("Inserted")])
+    )
+    assert_equal("<ins>Inserted</ins>", result.value)
+
+
+def test_deletion_is_converted_to_del():
+    result = convert_document_element_to_html(
+        documents.deletion(children=[documents.text("Deleted")])
+    )
+    assert_equal("<del>Deleted</del>", result.value)

@@ -37,7 +37,7 @@ def convert(
         external_file_access = False
 
     return options.read_options(kwargs).bind(lambda convert_options:
-        docx.read(fileobj, external_file_access=external_file_access).map(transform_document).bind(lambda document:
+        docx.read(fileobj, external_file_access=external_file_access, ignore_tracked_changes=convert_options.pop("ignore_tracked_changes", True)).map(transform_document).bind(lambda document:
             conversion.convert_document_element_to_html(
                 document,
                 id_prefix=id_prefix,

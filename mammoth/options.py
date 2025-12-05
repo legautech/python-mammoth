@@ -19,6 +19,7 @@ def read_options(options):
         style_map += _default_style_map
 
     options["ignore_empty_paragraphs"] = options.get("ignore_empty_paragraphs", True)
+    options["ignore_tracked_changes"] = options.get("ignore_tracked_changes", True)
     options["style_map"] = style_map
     return read_style_map_result.map(lambda _: options)
 

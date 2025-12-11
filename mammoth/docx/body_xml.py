@@ -23,7 +23,7 @@ def reader(
     styles=None,
     docx_file=None,
     files=None,
-    ignore_tracked_changes=True,
+    track_changes=False,
 ):
 
     if styles is None:
@@ -36,7 +36,7 @@ def reader(
         styles=styles,
         docx_file=docx_file,
         files=files,
-        ignore_tracked_changes=ignore_tracked_changes,
+        track_changes=track_changes,
     )
     return _BodyReader(read_all)
 
@@ -51,7 +51,7 @@ class _BodyReader(object):
         return results.Result(result.elements, result.messages)
 
 
-def _create_reader(numbering, content_types, relationships, styles, docx_file, files, ignore_tracked_changes):
+def _create_reader(numbering, content_types, relationships, styles, docx_file, files, track_changes):
     current_instr_text = []
     complex_field_stack = []
 
@@ -621,7 +621,7 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         return _success(documents.comment_reference(element.attributes["w:id"]))
 
     def read_insertion(element):
-        if ignore_tracked_changes:
+        if not track_changes:
             return read_child_elements(element)
         else:
             return read_child_elements(element).map(lambda children: documents.insertion(
@@ -631,7 +631,7 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
             ))
 
     def read_deletion(element):
-        if ignore_tracked_changes:
+        if not track_changes:
             return _empty_result
         else:
             return read_child_elements(element).map(lambda children: documents.deletion(

@@ -1847,14 +1847,14 @@ class TrackedChangesTests(object):
         element = xml_element("w:ins", {}, [
             _run_element_with_text("Inserted text")
         ])
-        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=True)
+        result = _read_and_get_document_xml_element(element, track_changes=False)
         assert_equal(documents.run([documents.text("Inserted text")]), result)
 
     def test_ins_is_read_as_insertion_when_tracked_changes_are_not_ignored(self):
         element = xml_element("w:ins", {}, [
             _run_element_with_text("Inserted text")
         ])
-        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        result = _read_and_get_document_xml_element(element, track_changes=True)
         assert_equal(documents.insertion([
             documents.run([documents.text("Inserted text")])
         ]), result)
@@ -1863,14 +1863,14 @@ class TrackedChangesTests(object):
         element = xml_element("w:del", {}, [
             _run_element_with_text("Deleted text")
         ])
-        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=True)
+        result = _read_and_get_document_xml_element(element, track_changes=False)
         assert_equal(None, result)
 
     def test_del_is_read_as_deletion_when_tracked_changes_are_not_ignored(self):
         element = xml_element("w:del", {}, [
             _run_element_with_text("Deleted text")
         ])
-        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        result = _read_and_get_document_xml_element(element, track_changes=True)
         assert_equal(documents.deletion([
             documents.run([documents.text("Deleted text")])
         ]), result)
@@ -1879,7 +1879,7 @@ class TrackedChangesTests(object):
         element = xml_element("w:del", {}, [
              xml_element("w:delText", {}, [xml_text("Deleted text")])
         ])
-        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        result = _read_and_get_document_xml_element(element, track_changes=True)
         assert_equal(documents.deletion([
             documents.text("Deleted text")
         ]), result)
@@ -1888,7 +1888,7 @@ class TrackedChangesTests(object):
         element = xml_element("w:ins", {"w:author": "Author", "w:date": "2019-01-01T00:00:00Z"}, [
             _run_element_with_text("Inserted text")
         ])
-        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        result = _read_and_get_document_xml_element(element, track_changes=True)
         assert_equal(documents.insertion([
             documents.run([documents.text("Inserted text")])
         ], author="Author", date="2019-01-01T00:00:00Z"), result)
@@ -1897,7 +1897,7 @@ class TrackedChangesTests(object):
         element = xml_element("w:del", {"w:author": "Author", "w:date": "2019-01-01T00:00:00Z"}, [
             _run_element_with_text("Deleted text")
         ])
-        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        result = _read_and_get_document_xml_element(element, track_changes=True)
         assert_equal(documents.deletion([
             documents.run([documents.text("Deleted text")])
         ], author="Author", date="2019-01-01T00:00:00Z"), result)

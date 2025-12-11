@@ -301,6 +301,9 @@ Converts the source document to HTML.
 * `ignore_empty_paragraphs`: by default, empty paragraphs are ignored.
   Set this option to `False` to preserve empty paragraphs in the output.
 
+* `track_changes`: by default, tracked changes are ignored.
+  Set this option to `True` to include tracked changes in the output.
+
 * `id_prefix`:
   a string to prepend to any generated IDs,
   such as those used by bookmarks, footnotes and endnotes.

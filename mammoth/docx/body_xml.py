@@ -624,13 +624,21 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         if ignore_tracked_changes:
             return read_child_elements(element)
         else:
-            return read_child_elements(element).map(lambda children: documents.insertion(children))
+            return read_child_elements(element).map(lambda children: documents.insertion(
+                children,
+                author=element.attributes.get("w:author"),
+                date=element.attributes.get("w:date"),
+            ))
 
     def read_deletion(element):
         if ignore_tracked_changes:
             return _empty_result
         else:
-            return read_child_elements(element).map(lambda children: documents.deletion(children))
+            return read_child_elements(element).map(lambda children: documents.deletion(
+                children,
+                author=element.attributes.get("w:author"),
+                date=element.attributes.get("w:date"),
+            ))
 
     def alternate_content(element):
         return read_child_elements(element.find_child_or_null("mc:Fallback"))

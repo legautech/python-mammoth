@@ -1883,3 +1883,21 @@ class TrackedChangesTests(object):
         assert_equal(documents.deletion([
             documents.text("Deleted text")
         ]), result)
+
+    def test_ins_attributes_are_read(self):
+        element = xml_element("w:ins", {"w:author": "Author", "w:date": "2019-01-01T00:00:00Z"}, [
+            _run_element_with_text("Inserted text")
+        ])
+        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        assert_equal(documents.insertion([
+            documents.run([documents.text("Inserted text")])
+        ], author="Author", date="2019-01-01T00:00:00Z"), result)
+
+    def test_del_attributes_are_read(self):
+        element = xml_element("w:del", {"w:author": "Author", "w:date": "2019-01-01T00:00:00Z"}, [
+            _run_element_with_text("Deleted text")
+        ])
+        result = _read_and_get_document_xml_element(element, ignore_tracked_changes=False)
+        assert_equal(documents.deletion([
+            documents.run([documents.text("Deleted text")])
+        ], author="Author", date="2019-01-01T00:00:00Z"), result)

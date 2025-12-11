@@ -61,11 +61,13 @@ class Text(Element):
 
 @cobble.data
 class Insertion(HasChildren):
-    pass
+    author = cobble.field()
+    date = cobble.field()
 
 @cobble.data
 class Deletion(HasChildren):
-    pass
+    author = cobble.field()
+    date = cobble.field()
 
 @cobble.data
 class Hyperlink(HasChildren):
@@ -183,11 +185,11 @@ class VerticalAlignment(object):
 
 text = Text
 
-def insertion(children):
-    return Insertion(children)
+def insertion(children, author=None, date=None):
+    return Insertion(children, author, date)
 
-def deletion(children):
-    return Deletion(children)
+def deletion(children, author=None, date=None):
+    return Deletion(children, author, date)
 
 _tab = Tab()
 

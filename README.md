@@ -304,6 +304,9 @@ Converts the source document to HTML.
 * `track_changes`: by default, tracked changes are ignored.
   Set this option to `True` to include tracked changes in the output.
 
+* `add_page_breaks`: by default, page breaks are ignored.
+  Set this option to `True` to insert `[PAGE BREAK]` into the output function.
+
 * `id_prefix`:
   a string to prepend to any generated IDs,
   such as those used by bookmarks, footnotes and endnotes.

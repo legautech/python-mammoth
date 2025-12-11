@@ -170,7 +170,7 @@ class _DocumentConverter(documents.element_visitor(args=1)):
         if insertion.author is not None:
             attributes["author"] = insertion.author
         if insertion.date is not None:
-            attributes["datetime"] = insertion.date
+            attributes["date"] = insertion.date
         nodes = self._visit_all(insertion.children, context)
         return [html.element("ins", attributes, nodes)]
 
@@ -179,7 +179,7 @@ class _DocumentConverter(documents.element_visitor(args=1)):
         if deletion.author is not None:
             attributes["author"] = deletion.author
         if deletion.date is not None:
-            attributes["datetime"] = deletion.date
+            attributes["date"] = deletion.date
         nodes = self._visit_all(deletion.children, context)
         return [html.element("del", attributes, nodes)]
 

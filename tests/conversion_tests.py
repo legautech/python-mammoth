@@ -688,7 +688,7 @@ def test_insertion_with_attributes_is_converted_to_ins_with_attributes():
             date="2019-01-01T00:00:00Z"
         )
     )
-    assert_equal('<ins author="Author" datetime="2019-01-01T00:00:00Z">Inserted</ins>', result.value)
+    assert_equal('<ins author="Author" date="2019-01-01T00:00:00Z">Inserted</ins>', result.value)
 
 
 def test_deletion_with_attributes_is_converted_to_del_with_attributes():
@@ -699,4 +699,4 @@ def test_deletion_with_attributes_is_converted_to_del_with_attributes():
             date="2019-01-01T00:00:00Z"
         )
     )
-    assert_equal('<del author="Author" datetime="2019-01-01T00:00:00Z">Deleted</del>', result.value)
+    assert_equal('<del author="Author" date="2019-01-01T00:00:00Z">Deleted</del>', result.value)

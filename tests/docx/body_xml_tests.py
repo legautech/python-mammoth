@@ -1901,3 +1901,15 @@ class TrackedChangesTests(object):
         assert_equal(documents.deletion([
             documents.run([documents.text("Deleted text")])
         ], author="Author", date="2019-01-01T00:00:00Z"), result)
+
+
+def test_last_rendered_page_break_is_ignored_by_default():
+    element = xml_element("w:lastRenderedPageBreak")
+    result = _read_and_get_document_xml_element(element)
+    assert_equal(None, result)
+
+
+def test_last_rendered_page_break_is_converted_to_text_when_enabled():
+    element = xml_element("w:lastRenderedPageBreak")
+    result = _read_and_get_document_xml_element(element, add_page_breaks=True)
+    assert_equal(documents.text("[PAGE BREAK]"), result)

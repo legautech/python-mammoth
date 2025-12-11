@@ -24,6 +24,7 @@ def reader(
     docx_file=None,
     files=None,
     track_changes=False,
+    add_page_breaks=False,
 ):
 
     if styles is None:
@@ -37,6 +38,7 @@ def reader(
         docx_file=docx_file,
         files=files,
         track_changes=track_changes,
+        add_page_breaks=add_page_breaks,
     )
     return _BodyReader(read_all)
 
@@ -51,7 +53,7 @@ class _BodyReader(object):
         return results.Result(result.elements, result.messages)
 
 
-def _create_reader(numbering, content_types, relationships, styles, docx_file, files, track_changes):
+def _create_reader(numbering, content_types, relationships, styles, docx_file, files, track_changes, add_page_breaks):
     current_instr_text = []
     complex_field_stack = []
 
@@ -68,7 +70,6 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         "w:bookmarkEnd",
         "w:sectPr",
         "w:proofErr",
-        "w:lastRenderedPageBreak",
         "w:commentRangeStart",
         "w:commentRangeEnd",
         "w:footnoteRef",
@@ -640,6 +641,12 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
                 date=element.attributes.get("w:date"),
             ))
 
+    def last_rendered_page_break(element):
+        if add_page_breaks:
+            return _success(documents.text("[PAGE BREAK]"))
+        else:
+            return _empty_result
+
     def alternate_content(element):
         return read_child_elements(element.find_child_or_null("mc:Fallback"))
 
@@ -722,6 +729,7 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         "w:commentReference": read_comment_reference,
         "w:ins": read_insertion,
         "w:del": read_deletion,
+        "w:lastRenderedPageBreak": last_rendered_page_break,
         "w:delText": text,
         "mc:AlternateContent": alternate_content,
         "w:sdt": read_sdt

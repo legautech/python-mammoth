@@ -19,7 +19,7 @@ from ..zips import open_zip
 _empty_result = results.success([])
 
 
-def read(fileobj, external_file_access=False, track_changes=False):
+def read(fileobj, external_file_access=False, track_changes=False, add_page_breaks=False):
     zip_file = open_zip(fileobj, "r")
     part_paths = _find_part_paths(zip_file)
     read_part_with_body = _part_with_body_reader(
@@ -28,6 +28,7 @@ def read(fileobj, external_file_access=False, track_changes=False):
         part_paths=part_paths,
         external_file_access=external_file_access,
         track_changes=track_changes,
+        add_page_breaks=add_page_breaks,
     )
 
     return results.combine([
@@ -136,7 +137,7 @@ def _read_document(zip_file, read_part_with_body, notes, comments, part_paths):
     )
 
 
-def _part_with_body_reader(document_path, zip_file, part_paths, external_file_access, track_changes):
+def _part_with_body_reader(document_path, zip_file, part_paths, external_file_access, track_changes, add_page_breaks):
     content_types = _try_read_entry_or_default(
         zip_file,
         "[Content_Types].xml",
@@ -174,6 +175,7 @@ def _part_with_body_reader(document_path, zip_file, part_paths, external_file_ac
             docx_file=zip_file,
             files=files,
             track_changes=track_changes,
+            add_page_breaks=add_page_breaks,
         )
 
         if default is _undefined:

@@ -20,6 +20,7 @@ def read_options(options):
 
     options["ignore_empty_paragraphs"] = options.get("ignore_empty_paragraphs", True)
     options["track_changes"] = options.get("track_changes", False)
+    options["add_page_breaks"] = options.get("add_page_breaks", False)
     options["style_map"] = style_map
     return read_style_map_result.map(lambda _: options)
 

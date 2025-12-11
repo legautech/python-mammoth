@@ -165,6 +165,25 @@ class _DocumentConverter(documents.element_visitor(args=1)):
         return [html.collapsible_element("a", attributes, nodes)]
 
 
+    def visit_insertion(self, insertion, context):
+        attributes = {}
+        if insertion.author is not None:
+            attributes["author"] = insertion.author
+        if insertion.date is not None:
+            attributes["date"] = insertion.date
+        nodes = self._visit_all(insertion.children, context)
+        return [html.element("ins", attributes, nodes)]
+
+    def visit_deletion(self, deletion, context):
+        attributes = {}
+        if deletion.author is not None:
+            attributes["author"] = deletion.author
+        if deletion.date is not None:
+            attributes["date"] = deletion.date
+        nodes = self._visit_all(deletion.children, context)
+        return [html.element("del", attributes, nodes)]
+
+
     def visit_checkbox(self, checkbox, context):
         attributes = {"type": "checkbox"}
 

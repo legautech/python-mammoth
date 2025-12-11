@@ -60,6 +60,16 @@ class Text(Element):
     value = cobble.field()
 
 @cobble.data
+class Insertion(HasChildren):
+    author = cobble.field()
+    date = cobble.field()
+
+@cobble.data
+class Deletion(HasChildren):
+    author = cobble.field()
+    date = cobble.field()
+
+@cobble.data
 class Hyperlink(HasChildren):
     href = cobble.field()
     anchor = cobble.field()
@@ -174,6 +184,12 @@ class VerticalAlignment(object):
     subscript = "subscript"
 
 text = Text
+
+def insertion(children, author=None, date=None):
+    return Insertion(children, author, date)
+
+def deletion(children, author=None, date=None):
+    return Deletion(children, author, date)
 
 _tab = Tab()
 
